@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resale Price against Month for Toa Payoh</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        .dot {
+            fill: steelblue;
+            stroke: white;
+            stroke-width: 2px;
+        }
+        .axis-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #ddd;
+            stroke-width: 1px;
+            shape-rendering: crispEdges;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resale Price against Date of Transaction for Toa Payoh</h1>
+    <b>Motivations behind creating this visualization</b>
+    <br>
+    <b1>Committing to the purchase of a house is a huge
+        undertaking, not to be done lightly. Hence,
+        when looking to purchase one, it is helpful to compare the resale
+        price over the years to get a sensing of the market.</b1>
+    <br>
+
+    <svg id='graph1' width="800" height="400"></svg>
+    <svg id='graph2' width="800" height="400"></svg>
+    <svg id='graph3' width="800" height="400"></svg>
+    <svg id='graph4' width="800" height="400"></svg>
+    <svg id='graph5' width="800" height="400"></svg>
+
+    <script>
+        const margin = {top: 20, right: 20, bottom: 50, left: 70};
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        //Graph of 2017 onwards
+        const svg1 = d3.select('#graph1');
+        const g1 = svg1.append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+        svg1.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', height + margin.top + margin.bottom - 10)
+            .style('text-anchor', 'middle')
+            .text('Resale price against date of transaction, 2017 onwards');
+        generateGraph('https://data.gov.sg/api/action/datastore_search?resource_id=f1765b54-a209-4718-8d38-a39237f502b3&q=toa%20payoh', g1);
+
+        //Graph of 2015 - 2016
+        const svg2 = d3.select('#graph2');
+        const g2 = svg2.append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+        svg2.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', height + margin.top + margin.bottom - 10)
+            .style('text-anchor', 'middle')
+            .text('Resale price against date of transaction, 2015 - 2016');
+        generateGraph('https://data.gov.sg/api/action/datastore_search?resource_id=1b702208-44bf-4829-b620-4615ee19b57c&q=toa%20payoh', g2);
+
+        //Graph of 2012 - 2014
+        const svg3 = d3.select('#graph3');
+        const g3 = svg3.append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+        svg3.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', height + margin.top + margin.bottom - 10)
+            .style('text-anchor', 'middle')
+            .text('Resale price against date of transaction, 2012 - 2014');
+        generateGraph('https://data.gov.sg/api/action/datastore_search?resource_id=83b2fc37-ce8c-4df4-968b-370fd818138b&q=toa%20payoh', g3);
+
+        //Graph of 2000 - 2012
+        const svg4 = d3.select('#graph4');
+        const g4 = svg4.append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+        svg4.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', height + margin.top + margin.bottom - 10)
+            .style('text-anchor', 'middle')
+            .text('Resale price against date of transaction, 2000 - 2012');
+        generateGraph('https://data.gov.sg/api/action/datastore_search?resource_id=8c00bf08-9124-479e-aeca-7cc411d884c4&q=toa%20payoh', g4);
+
+        //Graph of 1990 - 1999
+        const svg5 = d3.select('#graph5');
+        const g5 = svg5.append('g')
+          .attr('transform', `translate(${margin.left},${margin.top})`);
+        svg5.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', height + margin.top + margin.bottom - 10)
+            .style('text-anchor', 'middle')
+            .text('Resale price against date of transaction, 1990 - 1999');
+        generateGraph('https://data.gov.sg/api/action/datastore_search?resource_id=adbbddd3-30e2-445f-a123-29bee150a6fe&q=toa%20payoh', g5);
+
+        function generateGraph(dataSource, g) {
+            d3.json(dataSource)
+              .then(data => {
+                //2017 onwards graph
+                const parseTime = d3.timeParse('%Y-%m');
+                const formatTime = d3.timeFormat('%b %Y');
+                const x = d3.scaleTime()
+                    .domain(d3.extent(data.result.records, d => parseTime(d.month)))
+                    .range([0, width]);
+                const y = d3.scaleLinear()
+                    .domain([0, d3.max(data.result.records, d => +d.resale_price)])
+                    .range([height, 0]);
+                const xAxis = d3.axisBottom(x)
+                    .tickFormat(formatTime);
+                const yAxis = d3.axisLeft(y);
+                g.append('g')
+                    .attr('transform', `translate(0,${height})`)
+                    .call(xAxis)
+                    .append('text')
+                    .attr('class', 'axis-label')
+                    .attr('x', width / 2)
+                    .attr('y', 40)
+                    .text('Month');
+                g.append('g')
+                    .call(yAxis)
+                    .append('text')
+                    .attr('class', 'axis-label')
+                    .attr('transform', 'rotate(-90)')
+                    .attr('x', -height / 2)
+                    .attr('y', -60)
+                    .attr('dy', '1em')
+                    .text('Resale Price (SGD)');
+                g.selectAll('.dot')
+                    .data(data.result.records)
+                    .enter().append('circle')
+                    .attr('class', 'dot')
+                    .attr('cx', d => x(parseTime(d.month)))
+                    .attr('cy', d => y(+d.resale_price))
+                    .attr('r', 4)
+            })
+            .catch(error => console.error(error));
+          }
+
+</script>
+</body>
+</html>
